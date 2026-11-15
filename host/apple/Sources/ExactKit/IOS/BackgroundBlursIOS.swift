@@ -25,11 +25,17 @@ final class ExtensionBlurs {
     /// What the extension last asked for, which blurs made off the main thread are checked against as they land
     private var wanted: (source: CGImage, load: Int?, sigmas: [CGFloat])?
     /// The blurs being made off the main thread, one at a time
-    private var job: Job?
+    private var job: Job? { didSet { Self.inFlight += (job == nil ? 0 : 1) - (oldValue == nil ? 0 : 1) } }
+    /// Blurs being made off the main thread for every image: the agent's `clock settle` waits for them, as a mirror
+    /// changes when they land (`Agent.nativeInFlight`)
+    private(set) static var inFlight = 0
     /// Shows blurs made off the main thread (`ExtensionView`)
     var landed: (() -> Void)?
 
-    deinit { job?.cancel() }
+    deinit {
+        if job != nil { Self.inFlight -= 1 }
+        job?.cancel()
+    }
 
     /// Asks for the blurs of `source` by `sigmas`. Those made stand while their source is the same and each sigma is
     /// within a quarter of the one asked for; those of the same picture (its load, at the same shape) stand while new

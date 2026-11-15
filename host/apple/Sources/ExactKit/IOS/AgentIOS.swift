@@ -148,6 +148,8 @@ extension Agent {
         // animation under platform timing (LLP 1070.000 §11, §14): the fixed
         // point is where it lands, within settle's bound (LLP 1035.003 D5).
         if !presenter.collections.animating.isEmpty || presenter.elementScrolls.revealsInFlight || session.activationInFlight || presenter.launchAutofocusPending { return true }
+        // A background extension's blurs being made land on the mirror they were made for
+        if ExtensionBlurs.inFlight > 0 { return true }
         guard let editor = pendingTextReveal else { return false }
         guard let node = editor.owner, presenter.views[node.id] === node,
               node.textArea === editor, !presenter.navigation.isInactiveRoute(containing: node),
