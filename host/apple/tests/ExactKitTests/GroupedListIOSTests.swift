@@ -71,6 +71,15 @@ class GroupedListFixture: XCTestCase {
 }
 
 final class GroupedListIOSTests: GroupedListFixture {
+    /// After a batch the sync names every list whose rows it carried into its cells, so the presenter walks those
+    /// lists' routes again (`reachSafeEdges(holding:)`): one it made and one that only carried its rows again.
+    func testTheSyncNamesTheListsWhoseRowsItCarried() throws {
+        let p = presenter { self.model() }
+        let owner = try XCTUnwrap(p.views[1])
+        XCTAssertTrue(host(p).sync(changed: []).contains { $0 === owner }, "a list that only carried its rows again")
+        XCTAssertTrue(host(p).sync(changed: nil).contains { $0 === owner }, "a list updated from its model")
+    }
+
     func testTheNativeListAnswersTheStatusBarAndYieldsToAScrollingPage() throws {
         let p = presenter(height: 180) { self.model() }
         let native = try list(p).collection

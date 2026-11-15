@@ -225,8 +225,8 @@ final class GroupedListHost: GroupedLists {
 
     /// After a batch. `changed` is the touched views and their ancestors; a
     /// list outside it keeps its model and only carries its rows again.
-    func sync(changed: Set<UInt32>? = nil) {
-        var live = Set<UInt32>()
+    @discardableResult func sync(changed: Set<UInt32>? = nil) -> [NodeView] {
+        var live = Set<UInt32>(), moved: [NodeView] = []
         // A live edit of the theme's roles (LLP 1121 stage 5) changes no row,
         // but every list draws from them: each one updates.
         let rethemed = theme != ThemeRoles.generation
@@ -235,16 +235,22 @@ final class GroupedListHost: GroupedLists {
             live.insert(owner.id)
             if let list = lists[owner.id], list.owner === owner, let changed, !changed.contains(owner.id), !rethemed {
                 list.mount(looks: false)
+                moved.append(owner)
                 continue
             }
             guard let model = model(owner.id) else { continue }
-            if let old = lists[owner.id], old.owner !== owner { old.remove(); lists[owner.id] = nil }
+            if let old = lists[owner.id], old.owner !== owner { old.remove(); moved.append(old.owner); lists[owner.id] = nil }
             let list = lists[owner.id] ?? GroupedListView(owner: owner, host: self)
             lists[owner.id] = list
             list.update(model)
+            moved.append(owner)
         }
-        for id in Array(lists.keys) where !live.contains(id) && !presenter.slidesOut(id) { lists.removeValue(forKey: id)?.remove(); reads[id] = nil }
+        for id in Array(lists.keys) where !live.contains(id) && !presenter.slidesOut(id) {
+            if let gone = lists.removeValue(forKey: id) { gone.remove(); moved.append(gone.owner) }
+            reads[id] = nil
+        }
         tell()
+        return moved
     }
 
     /// The kernel lays a list's custom rows out at the width and margins

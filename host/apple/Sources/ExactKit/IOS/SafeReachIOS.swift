@@ -37,6 +37,16 @@ extension Presenter {
         for c in navigation.controllers.values where views[c.node.id] === c.node { reachSafeEdges(of: c) }
     }
 
+    /// The reach again of each shown route holding one of `lists`, the grouped lists whose rows their sync carried into
+    /// cells or put back (`GroupedListHost.sync`): that moves only their routes' views, so the others keep the reach the
+    /// batch's walk gave them.
+    func reachSafeEdges(holding lists: [NodeView]) {
+        guard !lists.isEmpty else { return }
+        for c in navigation.controllers.values where views[c.node.id] === c.node && lists.contains(where: { $0.isDescendant(of: c.node) }) {
+            reachSafeEdges(of: c)
+        }
+    }
+
     private func reachSafeEdges(of c: RouteController) {
         // A retained tab keeps its geometry and UIKit's offset while it is offscreen.
         guard let view = c.viewIfLoaded, view.window != nil else { return }

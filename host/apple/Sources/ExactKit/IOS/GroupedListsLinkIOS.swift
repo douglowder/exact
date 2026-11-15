@@ -23,8 +23,9 @@ package protocol GroupedLists: AnyObject {
     /// Where a row a list carries is drawn in its cell when layout places
     /// it at `place` in its parent; nil for a view no list carries.
     func cellFrame(of view: NodeView, at place: GridPlace) -> CGRect?
-    /// After a batch; `changed` is the touched views and their ancestors.
-    func sync(changed: Set<UInt32>?)
+    /// After a batch; `changed` is the touched views and their ancestors. Returns the owners of the lists whose rows it
+    /// carried into cells or put back, which moves only their routes' views.
+    @discardableResult func sync(changed: Set<UInt32>?) -> [NodeView]
     /// Whether some list holds a custom row's views in its cells.
     var carriesRows: Bool { get }
     func reset()

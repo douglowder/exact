@@ -1095,7 +1095,7 @@ package final class Presenter {
         let deferredIDs = takeDeferredGeometry(), changed = touchedAndAbove(touchedIDs + geometryApplied + deferredIDs) // PROTO (UIKit-first measurement): merge views deferred by geometry batches
         geometryApplied = []
         swipeActions.sync(changed: changed, reshaped: touchedAndAbove(reshapedIDs)); rowCells.sync(changed: changed)
-        groupedLists?.sync(changed: changed); reachSafeEdges(); reachPageEdges() // a list mounted now reaches its bands too
+        reachSafeEdges(holding: groupedLists?.sync(changed: changed) ?? []); reachPageEdges() // a list mounted now reaches its bands too
         if !flights.isEmpty { flightsBatchApplied() }
         #if os(tvOS)
         menuKey.sync()
