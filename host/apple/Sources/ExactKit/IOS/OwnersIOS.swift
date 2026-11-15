@@ -240,7 +240,7 @@ final class OwnerBlocks {
             guard let route = controller as? RouteController, let view = route.viewIfLoaded,
                   presenter.views[route.node.id] === route.node else { return nil }
             let block = self.block(in: view, editor: editor)
-            route.fitContentViewport(in: block)
+            route.fitContentViewport(in: block, editor: editor)
             return (route, view, block, view.window != nil && !block.isEmpty, presented)
         }
     }
