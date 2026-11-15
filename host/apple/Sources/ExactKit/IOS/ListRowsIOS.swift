@@ -110,7 +110,9 @@ extension Presenter {
             return result
         }
         return batch.ops.allSatisfy { op in
-            // PROTO (UIKit-first measurement): pass geometry on any node, the named scroller's included
+            // PROTO (UIKit-first measurement): pass geometry on any node, the named scroller's included. The frames
+            // along a moving top edge (`far`) do not pass: a field revealed over the keys in a tab's grouped list needs
+            // the sync their batches run (`testAFocusedFieldAndItsAddButtonStayAboveTheKeyboardInATabsGroupedList`).
             if op.isGeometry { return true }
             // It changes or removes what a header button invokes, a view or a paragraph's run.
             if targets.contains(op.id) { return false }
