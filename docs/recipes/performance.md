@@ -1,7 +1,8 @@
 # Recipe: a slow screen, a slow transition or a hitch
 
-Measure before changing anything, on the build that ships, with the feel probe in the Exact checkout your
-`exact.mjs` names:
+Find whose the time is before changing anything. A trace or probe output of the release build already says: read
+it. Measure (again) only without one, or when it came from a development build or a run that read the
+accessibility tree. Measure the build that ships, with the feel probe in the Exact checkout your `exact.mjs` names:
 
 ```sh
 bun exact.mjs ios --release
@@ -18,6 +19,11 @@ bun <exact checkout>/host/apple/feel/probe.mjs --udid <udid> --app <bundle id> -
   built with SwiftUI pays too: UIKit's push, split and sheet transitions, the first navigation bar and search field
   at launch, the keyboard's first appearance, MapKit making a map. Stop there.
 
+A Time Profiler trace reads the same way. Every touch enters through `ExactWindow.sendEvent`: read what is under
+it (a push, the keyboard coming up) before blaming it. An Exact function whose time is UIKit's transition frames
+(`_UINavigationParallaxTransition`, `_didMoveFromWindow`) is UIKit's push. UIKit's own bars and controls run
+SwiftUI inside: SwiftUI frames in an app that writes none are the platform's.
+
 Costs your Contract chooses:
 
 - A `scroll=` action lays the screen out and applies it on every frame it changes state. A stretchy header that
@@ -25,8 +31,10 @@ Costs your Contract chooses:
   button past 300 points, store a boolean, not the offset.
 - `-exact-safe-area="extend"` blurs a picture when it first shows and keeps the blurs: a hero picture, not each
   row's thumbnail.
-- A native view in list rows: `ExactNativeFactory(…, reuse: true)` and `prepareForReuse()`. Outside rows a map is
-  made each time it shows, as SwiftUI makes it: do not make one at launch or keep one hidden.
+- A native view in list rows: `ExactNativeFactory(…, reuse: true)` and `prepareForReuse()`. Outside rows a native
+  view is made each time its node is: when it first shows, as SwiftUI makes its map, so do not make one at launch
+  or keep one hidden; and again whenever its node's `key` changes, so keep the key stable and pass what changes as
+  props.
 
 Not evidence:
 

@@ -400,8 +400,11 @@ on the tailnet (LLP 1115.004 D13). As recorded on 2026-10-23:
   `-[UIApplicationAccessibility sendEvent:]` wraps every touch: an override that
   calls the same selector passes through, and the app's work is under it. A Mac
   benchmark does not stand for iOS: measure on the simulator or a phone.
-- **Hot paths do only the needed work.** No unconditional `NSLog` or `print`
-  (`caps` counts them); a class check before a protocol check, whose first test
-  of a class searches every loaded conformance; a private class looked up once,
-  not by its name's string; the first responder found once per pass; a derived
-  image kept across a resize and remade off the main thread.
+- **Hot paths do only the needed work.** A trace that names a host function
+  and its cost is evidence enough to change that function. No unconditional
+  `NSLog` or `print` (`caps` counts them); a class check before a protocol
+  check, whose first test of a class searches every loaded conformance (Swift's
+  runtime lookups under UIKit's or SwiftUI's own frames are the platform's); a
+  private class looked up once, not by its name's string; the first responder
+  found once per pass; a derived image kept across a resize and remade off the
+  main thread.
