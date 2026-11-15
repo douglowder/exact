@@ -108,6 +108,7 @@ bun exact.mjs contract vocab timers dates-and-days task        # a timer, a day'
 |a sheet that edits the row tapped, filled with its values|`edit-sheet`|
 |rows added and removed in a form|`editable-rows`|
 |a write that may be refused|`after-a-write`|
+|a slow screen, transition or hitch: measure, and whose it is|`performance`|
 |a failure the person must acknowledge (an alert with OK)|`error-alert`|
 |tabular digits: numeric columns or values changing in place|`numeric-readout`|
 |a number field, a stepper's `step`|`number-field`, `stepper`|

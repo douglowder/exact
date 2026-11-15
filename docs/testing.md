@@ -387,3 +387,21 @@ on the tailnet (LLP 1115.004 D13). As recorded on 2026-10-23:
   symbolicated backtrace at every wait on a lower-priority thread, and its
   diagnostics collection can wait out a 600 s timeout; `build.mjs --test --ios`
   runs without both.
+
+## Measuring the host's speed
+
+- **Measure the release build with the feel probe.** `host/apple/feel/probe.mjs`
+  with `measure <step>` times a transition and labels whose its late frames'
+  time was (Exact's host, its runtime, the app's JS or modules, a platform
+  framework); a SwiftUI twin of the screen, probed the same way, is the baseline
+  (`host/apple/feel/README.md`).
+- **Keep the work under accessibility's overrides.** A Time Profiler trace of a
+  drive by the touch runner has accessibility on, and
+  `-[UIApplicationAccessibility sendEvent:]` wraps every touch: an override that
+  calls the same selector passes through, and the app's work is under it. A Mac
+  benchmark does not stand for iOS: measure on the simulator or a phone.
+- **Hot paths do only the needed work.** No unconditional `NSLog` or `print`
+  (`caps` counts them); a class check before a protocol check, whose first test
+  of a class searches every loaded conformance; a private class looked up once,
+  not by its name's string; the first responder found once per pass; a derived
+  image kept across a resize and remade off the main thread.

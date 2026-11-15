@@ -57,6 +57,7 @@ pub const RECIPES: &[(&str, &str)] = &[
     recipe!("number-field"),
     recipe!("numeric-readout"),
     recipe!("oauth"),
+    recipe!("performance"),
     recipe!("permissions"),
     recipe!("persisted-setting"),
     recipe!("porting-and-release"),

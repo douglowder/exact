@@ -1,0 +1,38 @@
+# Recipe: a slow screen, a slow transition or a hitch
+
+Measure before changing anything, on the build that ships, with the feel probe in the Exact checkout your
+`exact.mjs` names:
+
+```sh
+bun exact.mjs ios --release
+bun <exact checkout>/host/apple/feel/probe.mjs --udid <udid> --app <bundle id> --steps 'tap "Trails";measure tap "Bright Angel"'
+```
+
+`measure <step>` prints the step's main-thread time, its late frames, and whose their time was; for scrolling,
+`bun exact.mjs verify ios` runs the same probe. Read the labels:
+
+- `app JS`, and `Exact runtime (main waits on exact.owner)`: your Contract and data work. Yours.
+- `app code`: your native module. Yours.
+- `Exact host` alone: Exact's own. Report it with the probe's `feel.json`; do not work around it in the app.
+- `Exact host (in UIKit …)`, `(in maps …)`, or a framework alone: the platform's work, which the same screen
+  built with SwiftUI pays too: UIKit's push, split and sheet transitions, the first navigation bar and search field
+  at launch, the keyboard's first appearance, MapKit making a map. Stop there.
+
+Costs your Contract chooses:
+
+- A `scroll=` action lays the screen out and applies it on every frame it changes state. A stretchy header that
+  writes only the pull is right, and an action that writes the value state already holds costs nothing; to show a
+  button past 300 points, store a boolean, not the offset.
+- `-exact-safe-area="extend"` blurs a picture when it first shows and keeps the blurs: a hero picture, not each
+  row's thumbnail.
+- A native view in list rows: `ExactNativeFactory(…, reuse: true)` and `prepareForReuse()`. Outside rows a map is
+  made each time it shows, as SwiftUI makes it: do not make one at launch or keep one hidden.
+
+Not evidence:
+
+- A development build: its agent and development menu are not in the app.
+- Absolute numbers from a run that read the accessibility tree (`axe describe-ui`, a tap by label): the
+  accessibility runtime it turns on adds work people without assistive technology never pay. Compare runs.
+- A first launch against a later one, or a Mac benchmark for an iOS change.
+
+Write only syntax Exact accepts: `contract vocab <name>` says; `animation-timeline: scroll()` is refused.
