@@ -208,8 +208,32 @@ export function runCaps(root = process.cwd()) {
   helps(root);
   wasm(root);
   reentry(root, files);
+  hostLogs(root, files);
 
   return { problems, counted };
+}
+
+/**
+ * A log line in a native host runs in release builds on every call: an `NSLog` in a per-batch path took 9 ms of the
+ * main thread over one pull past a scroller's top. Native host sources may not call `NSLog` or `print` more often
+ * than they did when the count began; each one removed lowers it.
+ */
+const HOST_LOG_BASELINE = 38;
+function hostLogs(root, files) {
+  const CALL = /(^|[^\w.])(NSLog|print)\(/g;
+  let calls = 0;
+  for (const f of files) {
+    if (!f.startsWith('host/') || !f.endsWith('.swift') || /\/tests?\//i.test(f) || VENDORED.test(f) || !existsSync(resolve(root, f))) continue;
+    for (const line of readFileSync(resolve(root, f), 'utf8').split('\n')) {
+      if (/^\s*\/\//.test(line)) continue;
+      calls += [...line.matchAll(CALL)].length;
+    }
+  }
+  if (calls > HOST_LOG_BASELINE) {
+    fail('cap:host-log', `Native host sources call NSLog or print ${calls} times, more than the ${HOST_LOG_BASELINE} counted when the check began.`,
+      'Each runs in release builds whenever its path runs. Put a diagnostic behind a switch read once at launch, or report through the session\'s log (`session.log`), or remove it before landing; remove another call to make room.');
+  }
+  counted.push(`native host log calls: ${calls} of ${HOST_LOG_BASELINE} allowed`);
 }
 
 /**
